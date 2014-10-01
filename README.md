@@ -1,4 +1,4 @@
-dependency-injection-spike
+Play/Akka with and DI
 ==========================
 
-Play/Akka applications with DI bundled in
+Playground repo for looking at how a dependency injection integrates with Play and Akka frameworks 
