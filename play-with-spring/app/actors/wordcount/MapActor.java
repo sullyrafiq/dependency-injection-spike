@@ -1,4 +1,4 @@
-package actors;
+package actors.wordcount;
 
 import akka.actor.Props;
 import akka.actor.UntypedActor;

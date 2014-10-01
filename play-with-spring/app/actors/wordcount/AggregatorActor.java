@@ -1,4 +1,4 @@
-package actors;
+package actors.wordcount;
 
 import akka.actor.Props;
 import akka.actor.UntypedActor;
@@ -11,11 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created with IntelliJ IDEA.
- * User: sully.rafiq
- * Date: 27/01/14
- * Time: 17:40
- * To change this template use File | Settings | File Templates.
+ *
  */
 public class AggregatorActor extends UntypedActor {
 

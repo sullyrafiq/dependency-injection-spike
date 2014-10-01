@@ -1,4 +1,4 @@
-package actors;
+package actors.wordcount;
 
 import akka.actor.*;
 import akka.japi.Function;
@@ -7,8 +7,13 @@ import model.Result;
 import model.Sentence;
 import model.mapreduce.MapData;
 import model.mapreduce.ReduceData;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import scala.concurrent.duration.Duration;
+import spring.SpringExtension;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.File;
 import java.io.FileNotFoundException;
 
@@ -16,32 +21,43 @@ import static akka.actor.SupervisorStrategy.escalate;
 import static akka.actor.SupervisorStrategy.resume;
 
 /**
- * Created with IntelliJ IDEA.
- * User: sully.rafiq
- * Date: 28/01/14
- * Time: 09:20
- * To change this template use File | Settings | File Templates.
+ *
  */
-public class MasterActor extends UntypedActor {
+@Named("WordCountActor")
+@org.springframework.context.annotation.Scope("prototype")
+public class WordCountActor extends UntypedActor {
 
     private ActorRef mapActor;
     private ActorRef reduceActor;
     private ActorRef aggregateActor;
     private ActorRef fileActor;
 
-    public static final Props mkProps() {
-        return Props.create(MasterActor.class);
-    }
+    @Inject
+    public WordCountActor(@Qualifier("FileActorProps") Props fileProps,
+                          @Qualifier("MapActorProps") Props mapProps,
+                          @Qualifier("ReduceActorProps") Props reduceProps,
+                          @Qualifier("AggregatorActorProps") Props aggregatorProps) {
 
-    public MasterActor() {
         fileActor = getContext().actorOf(
-                FileActor.mkProps().withRouter(new RoundRobinRouter(5)), "file");
+                fileProps.withRouter(new RoundRobinRouter(5)),
+                "FileActor"
+        );
+
         mapActor = getContext().actorOf(
-                MapActor.mkProps().withRouter(new RoundRobinRouter(5)), "map");
+                mapProps.withRouter(new RoundRobinRouter(5)),
+                "MapActor"
+        );
+
         reduceActor = getContext().actorOf(
-                ReduceActor.mkProps().withRouter(new RoundRobinRouter(5)), "reduce");
+                reduceProps.withRouter(new RoundRobinRouter(5)),
+                "ReduceActor"
+        );
+
         aggregateActor = getContext().actorOf(
-                AggregatorActor.mkProps());
+                aggregatorProps.withRouter(new RoundRobinRouter(5)),
+                "AggregatorActor"
+        );
+
     }
 
     private static SupervisorStrategy strategy =
