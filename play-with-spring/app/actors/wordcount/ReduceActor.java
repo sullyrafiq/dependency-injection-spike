@@ -7,6 +7,9 @@ import akka.event.LoggingAdapter;
 import model.WordCount;
 import model.mapreduce.MapData;
 import model.mapreduce.ReduceData;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import services.GreetingService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +40,12 @@ public class ReduceActor extends UntypedActor {
         Map<String, Integer> reducedData = new HashMap<String, Integer>();
         for (Object obj : mapData.getData()) {
             WordCount wordCount = (WordCount) obj;
-            reducedData.put(wordCount.getWord(), wordCount.getCount());
+            Integer existingCount = reducedData.get(wordCount.getWord());
+            if (existingCount == null) {
+                existingCount = Integer.valueOf(0);
+            }
+
+            reducedData.put(wordCount.getWord(), existingCount + wordCount.getCount());
         }
 
         return new ReduceData<String, Integer>(reducedData);

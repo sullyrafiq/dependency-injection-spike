@@ -35,8 +35,7 @@ public class WordCountActor extends UntypedActor {
     @Inject
     public WordCountActor(@Qualifier("FileActorProps") Props fileProps,
                           @Qualifier("MapActorProps") Props mapProps,
-                          @Qualifier("ReduceActorProps") Props reduceProps,
-                          @Qualifier("AggregatorActorProps") Props aggregatorProps) {
+                          @Qualifier("ReduceActorProps") Props reduceProps) {
 
         fileActor = getContext().actorOf(
                 fileProps.withRouter(new RoundRobinRouter(5)),
@@ -54,7 +53,7 @@ public class WordCountActor extends UntypedActor {
         );
 
         aggregateActor = getContext().actorOf(
-                aggregatorProps.withRouter(new RoundRobinRouter(5)),
+                SpringExtension.SpringExtProvider.get(getContext().system()).props("AggregatorActor"),
                 "AggregatorActor"
         );
 

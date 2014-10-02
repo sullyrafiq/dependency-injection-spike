@@ -6,26 +6,31 @@ import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import model.Result;
 import model.mapreduce.ReduceData;
+import org.springframework.context.annotation.Scope;
+import services.PersistentWordCountStorage;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  *
  */
+@Named("AggregatorActor")
+@Scope("prototype")
 public class AggregatorActor extends UntypedActor {
 
     private final LoggingAdapter log = Logging.getLogger(getContext().system(), this);
-
-    private Map<String, Integer> finalReducedMap;
+    private final PersistentWordCountStorage persistentWordCountStorage;
 
     public static final Props mkProps() {
         return Props.create(AggregatorActor.class);
     }
 
-    @Override
-    public void preStart() throws Exception {
-        finalReducedMap = new HashMap<String, Integer>();
+    @Inject
+    public AggregatorActor(PersistentWordCountStorage persistentWordCountStorage) {
+        this.persistentWordCountStorage = persistentWordCountStorage;
     }
 
     @Override
@@ -34,7 +39,7 @@ public class AggregatorActor extends UntypedActor {
             aggregateInMemoryReduce((ReduceData) message);
 
         } else if (message instanceof Result) {
-            getSender().tell(finalReducedMap.toString(), getSelf());
+            getSender().tell(persistentWordCountStorage.getWordCount().toString(), getSelf());
 
         } else {
             unhandled(message);
@@ -42,17 +47,11 @@ public class AggregatorActor extends UntypedActor {
     }
 
     private void aggregateInMemoryReduce(ReduceData reduceData) {
-        Map<String, Integer> data = reduceData.getData();
+        Map<String, Integer> reducedData = reduceData.getData();
         log.debug("Aggregating the reduced data " + reduceData.getData());
 
-        for (String word : data.keySet()) {
-            Integer count = finalReducedMap.get(word);
-            if (count == null) {
-                count = Integer.valueOf(0);
-            }
-
-            count = count + data.get(word);
-            finalReducedMap.put(word, count);
+        for (String word : reducedData.keySet()) {
+            persistentWordCountStorage.addWordCount(word, reducedData.get(word));
         }
     }
 }

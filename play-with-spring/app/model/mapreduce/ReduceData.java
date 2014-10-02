@@ -1,5 +1,7 @@
 package model.mapreduce;
 
+import model.WordCount;
+
 import java.util.Map;
 
 /**

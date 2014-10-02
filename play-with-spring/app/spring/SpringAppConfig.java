@@ -41,11 +41,6 @@ public class SpringAppConfig {
         return ReduceActor.mkProps();
     }
 
-    @Bean(name = "AggregatorActorProps")
-    public Props aggregateActor() {
-        return AggregatorActor.mkProps();
-    }
-
     @Bean(name = "FileActorProps")
     public Props fileActor() {
         return FileActor.mkProps();

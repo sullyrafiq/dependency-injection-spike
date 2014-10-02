@@ -14,4 +14,7 @@ public class GreetingService {
         return "Hello World!";
     }
 
+    public String wordCountInstruction() {
+        return "Add a sentence";
+    }
 }

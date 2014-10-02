@@ -1,9 +1,16 @@
-@(message: String, result: String)
+@(message: String)
 
-@main("Greeting") {
+@main("Add Sentences") {
 
     <h2>@message</h2>
 
-    <h4>@result</h4>
+    <div>
+        <form action="add" method="POST">
+            <input type="text" name="sentence" />
+            <input type="submit">
+        </form>
+
+        <a href="/results">See word count</a>
+    </div>
 
 }

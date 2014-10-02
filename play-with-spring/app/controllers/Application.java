@@ -7,6 +7,8 @@ import model.Sentence;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.*;
 import play.*;
+import play.data.DynamicForm;
+import play.data.Form;
 import play.libs.F;
 import play.mvc.*;
 
@@ -33,18 +35,25 @@ public class Application extends Controller {
                 SpringExtension.SpringExtProvider.get(actorSystem).props("WordCountActor"), "WordCountActor");
     }
 
-    public F.Promise<Result> index() {
-        wordCountActor.tell(new Sentence("The quick brown fox tried to jump over the lazy dog and fell on the dog"), ActorRef.noSender());
-        wordCountActor.tell(new Sentence("Dog is man's best friend"), ActorRef.noSender());
-        wordCountActor.tell(new Sentence("Dog and Fox belong to the same family"), ActorRef.noSender());
+    public Result index() {
+        return ok(greeting.render(greetingService.wordCountInstruction()));
+    }
 
+    public F.Promise<Result> results() {
         return F.Promise.wrap(Patterns.ask(wordCountActor, new model.Result(), 1000)).map(
-            new F.Function<Object, Result>() {
-                @Override
-                public Result apply(Object result) throws Throwable {
-                    return ok(greeting.render(greetingService.hello(), (String) result));
+                new F.Function<Object, Result>() {
+                    @Override
+                    public Result apply(Object result) throws Throwable {
+                        return ok(results.render((String) result));
+                    }
                 }
-            }
         );
     }
+
+    public Result addSentence() {
+        DynamicForm requestData = Form.form().bindFromRequest();
+        wordCountActor.tell(new Sentence(requestData.get("sentence")), ActorRef.noSender());
+        return redirect("/");
+    }
+
 }
